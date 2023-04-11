@@ -10,5 +10,6 @@ namespace ShippingApp.Data
         }
         public DbSet<ProductType> ProductTypes { get; set; }
         public DbSet<ContainerType> ContainerTypes { get; set; }
+        public DbSet<Driver> Drivers { get; set; }
     }
 }

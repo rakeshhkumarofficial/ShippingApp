@@ -30,9 +30,9 @@ namespace ShippingApp.Controllers
         }
 
         [HttpGet]
-        public ActionResult Search(Guid productTypeId, string? type)
+        public ActionResult Search(Guid productTypeId, string? searchString)
         {
-            var res = _productTypeService.GetProductTypes(productTypeId, type);
+            var res = _productTypeService.GetProductTypes(productTypeId, searchString);
             return Ok(res);
         }
 

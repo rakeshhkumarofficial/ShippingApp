@@ -1,4 +1,5 @@
-﻿using ShippingApp.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using ShippingApp.Data;
 using ShippingApp.Models;
 using System.Net;
 using System.Numerics;
@@ -57,13 +58,13 @@ namespace ShippingApp.Services
             }
             _dbContext.ProductTypes.Remove(productType);
             _dbContext.SaveChanges();
-            response.Data = productTypeId;
+            response.Data = productType;
             response.StatusCode = 200;
             response.IsSuccess = true;
             response.Message = "Product Type is Deleted";
             return response;
         }
-        public Response GetProductTypes(Guid productTypeId, string type)
+        public Response GetProductTypes(Guid productTypeId, string? type)
         {
             response.IsSuccess = true;
             response.StatusCode = 200;
@@ -74,7 +75,8 @@ namespace ShippingApp.Services
                 response.Data = obj;
                 return response;
             }
-            var productTypes = from productType in _dbContext.ProductTypes where ((productType.productTypeId == productTypeId || productTypeId == Guid.Empty) && (productType.type == type || type == null)) select productType;
+           
+            var productTypes = from productType in _dbContext.ProductTypes where ((productType.productTypeId == productTypeId || productTypeId == Guid.Empty) && (EF.Functions.Like(productType.type, "%" + type + "%")|| type == null)) select productType;
             response.Data = productTypes;
             return response;
         }
