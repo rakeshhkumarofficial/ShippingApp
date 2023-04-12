@@ -42,6 +42,7 @@ namespace ShippingApp.Services
             _dbContext.ProductTypes.Add(obj);
             _dbContext.SaveChanges();
             response.IsSuccess = true;
+            response.StatusCode = 200;
             response.Data = obj;
             response.Message = "New Product Type Created";
             return response;
@@ -97,6 +98,7 @@ namespace ShippingApp.Services
             _dbContext.SaveChanges();
             response.Data = productType;
             response.StatusCode = 200;
+            response.IsSuccess = true;
             response.Message = "Product Type Updated";
             return response;
         }

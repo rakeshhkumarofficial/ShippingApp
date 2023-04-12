@@ -35,5 +35,12 @@ namespace ShippingApp.Controllers
             var res = _containerTypeService.GetContainerTypes(containerTypeId, searchString);
             return Ok(res);
         }
+
+        [HttpPut]
+        public ActionResult Update(ContainerType updateContainer)
+        {
+            var res = _containerTypeService.UpdateContainerType(updateContainer);
+            return Ok(res);
+        }
     }
 }

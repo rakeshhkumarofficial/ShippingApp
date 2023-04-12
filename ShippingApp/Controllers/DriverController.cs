@@ -28,5 +28,19 @@ namespace ShippingApp.Controllers
             var res = _driverService.DeleteDriver(driverId);
             return Ok(res);
         }
+
+        [HttpGet]
+        public ActionResult Search(Guid driverId, string? location , bool isAvailable)
+        {
+            var res = _driverService.GetDriver(driverId, location, isAvailable);
+            return Ok(res);
+        }
+
+        [HttpPut]
+        public ActionResult Update(Driver updateDriver)
+        {
+            var res = _driverService.UpdateDriver(updateDriver);
+            return Ok(res);
+        }
     }
 }

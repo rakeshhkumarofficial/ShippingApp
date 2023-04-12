@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ShippingApp.Data;
 
@@ -11,9 +12,11 @@ using ShippingApp.Data;
 namespace ShippingApp.Migrations
 {
     [DbContext(typeof(ShippingDbContext))]
-    partial class ShippingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230412123502_Checkpoints")]
+    partial class Checkpoints
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -47,8 +50,8 @@ namespace ShippingApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<float>("price")
-                        .HasColumnType("real");
+                    b.Property<decimal>("price")
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("containerTypeId");
 
@@ -82,8 +85,8 @@ namespace ShippingApp.Migrations
                     b.Property<bool>("isFragile")
                         .HasColumnType("bit");
 
-                    b.Property<float>("price")
-                        .HasColumnType("real");
+                    b.Property<decimal>("price")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("type")
                         .IsRequired()

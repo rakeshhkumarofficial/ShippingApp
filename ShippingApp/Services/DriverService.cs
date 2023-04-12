@@ -1,4 +1,5 @@
-﻿using ShippingApp.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using ShippingApp.Data;
 using ShippingApp.Migrations;
 using ShippingApp.Models;
 
@@ -33,6 +34,7 @@ namespace ShippingApp.Services
                 _dbContext.Drivers.Add(driver);
                 _dbContext.SaveChanges();
                 response.IsSuccess = true;
+                response.StatusCode = 200;
                 response.Data = driver;
                 response.Message = "New Driver Created";
                 return response;
@@ -40,13 +42,12 @@ namespace ShippingApp.Services
             response.Message = "Driver already Exits";
             return response;
         }
-
-        public Response DeleteDriver(Guid driverid)
+        public Response DeleteDriver(Guid driverId)
         {
             response.Data = null;
             response.StatusCode = 404;
             response.IsSuccess = false;
-            var driver = _dbContext.Drivers.Find(driverid);
+            var driver = _dbContext.Drivers.Find(driverId);
             if (driver == null)
             {
                 response.Message = "Driver not Found";
@@ -58,6 +59,42 @@ namespace ShippingApp.Services
             response.StatusCode = 200;
             response.IsSuccess = true;
             response.Message = "Driver is Deleted";
+            return response;
+        }
+        public Response GetDriver(Guid driverId, string? location, bool isAvailable)
+        {
+            response.IsSuccess = true;
+            response.StatusCode = 200;
+            response.Message = "Drivers List";
+            if (driverId == Guid.Empty && location == null)
+            {
+                var obj = _dbContext.Drivers;
+                response.Data = obj;
+                return response;
+            }
+            var drivers = from driver in _dbContext.Drivers where ((driver.driverId == driverId || driverId == Guid.Empty) && (EF.Functions.Like(driver.location, "%" + location + "%") || location == null) && (driver.isAvailable == isAvailable)) select driver;
+            response.Data = drivers;
+            return response;
+        }
+
+        public Response UpdateDriver(Driver updateDriver)
+        {
+            response.Data = null;
+            response.StatusCode = 404;
+            response.IsSuccess = false;
+            var driver = _dbContext.Drivers.Find(updateDriver.driverId);
+            if (driver == null)
+            {
+                response.Message = "Driver Not Found";
+                return response;
+            }
+            if (updateDriver.location != null) { driver.location = updateDriver.location; }
+            driver.isAvailable = updateDriver.isAvailable;
+            _dbContext.SaveChanges();
+            response.Data = driver;
+            response.StatusCode = 200;
+            response.IsSuccess = true;  
+            response.Message = "Driver Details Updated";
             return response;
         }
     }

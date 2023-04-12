@@ -16,6 +16,9 @@ builder.Services.AddDbContext<ShippingDbContext>(options =>
 
 builder.Services.AddScoped<IProductTypeService, ProductTypeService>();
 builder.Services.AddScoped<IContainerTypeService, ContainerTypeService>();
+builder.Services.AddScoped<IDriverService, DriverService>();
+builder.Services.AddScoped<ICheckpointService,CheckpointService>();
+
 
 var app = builder.Build();
 
