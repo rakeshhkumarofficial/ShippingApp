@@ -12,8 +12,8 @@ using ShippingApp.Data;
 namespace ShippingApp.Migrations
 {
     [DbContext(typeof(ShippingDbContext))]
-    [Migration("20230412123502_Checkpoints")]
-    partial class Checkpoints
+    [Migration("20230412130651_checkpoint")]
+    partial class checkpoint
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -50,8 +50,8 @@ namespace ShippingApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("price")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<float>("price")
+                        .HasColumnType("real");
 
                     b.HasKey("containerTypeId");
 
@@ -85,8 +85,8 @@ namespace ShippingApp.Migrations
                     b.Property<bool>("isFragile")
                         .HasColumnType("bit");
 
-                    b.Property<decimal>("price")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<float>("price")
+                        .HasColumnType("real");
 
                     b.Property<string>("type")
                         .IsRequired()
@@ -95,6 +95,19 @@ namespace ShippingApp.Migrations
                     b.HasKey("productTypeId");
 
                     b.ToTable("ProductTypes");
+                });
+
+            modelBuilder.Entity("ShippingApp.Models.Test", b =>
+                {
+                    b.Property<int>("MyProperty")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MyProperty"));
+
+                    b.HasKey("MyProperty");
+
+                    b.ToTable("tests");
                 });
 #pragma warning restore 612, 618
         }

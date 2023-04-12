@@ -93,6 +93,19 @@ namespace ShippingApp.Migrations
 
                     b.ToTable("ProductTypes");
                 });
+
+            modelBuilder.Entity("ShippingApp.Models.Test", b =>
+                {
+                    b.Property<int>("MyProperty")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MyProperty"));
+
+                    b.HasKey("MyProperty");
+
+                    b.ToTable("tests");
+                });
 #pragma warning restore 612, 618
         }
     }
