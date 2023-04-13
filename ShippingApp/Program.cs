@@ -1,10 +1,16 @@
 using Microsoft.EntityFrameworkCore;
 using ShippingApp.Data;
+using ShippingApp.RabbitMQ;
 using ShippingApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddScoped<IProductTypeService, ProductTypeService>();
+builder.Services.AddScoped<IContainerTypeService, ContainerTypeService>();
+builder.Services.AddScoped<IDriverService, DriverService>();
+builder.Services.AddScoped<ICheckpointService, CheckpointService>();
+builder.Services.AddScoped<IRabbitMQProducer, RabbitMQProducer>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -14,11 +20,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ShippingDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ConnectionString")));
 
-builder.Services.AddScoped<IProductTypeService, ProductTypeService>();
-builder.Services.AddScoped<IContainerTypeService, ContainerTypeService>();
-builder.Services.AddScoped<IDriverService, DriverService>();
-builder.Services.AddScoped<ICheckpointService,CheckpointService>();
-
+builder.Services.AddHostedService<RabbitMQConsumer>();
 
 var app = builder.Build();
 

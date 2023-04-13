@@ -32,9 +32,16 @@ namespace ShippingApp.RabbitMQ
             using (var scope = _serviceProvider.CreateScope())
             {
                 var service = scope.ServiceProvider.GetService<IDeliveryService>();
+                // Rabbit MQ Server
                 var factory = new ConnectionFactory
                 {
-                    HostName = "localhost"
+                    //HostName = "localhost"
+                    HostName = "192.180.3.63",
+                    Port = Protocols.DefaultProtocol.DefaultPort,
+                    UserName = "guest",
+                    Password = "guest",
+                    VirtualHost = "/",
+                    ContinuationTimeout = new TimeSpan(10, 0, 0, 0)
                 };
                 //RabbitMQ connection using connection factory
                 var connection = factory.CreateConnection();

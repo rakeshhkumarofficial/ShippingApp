@@ -2,16 +2,19 @@
 using ShippingApp.Data;
 using ShippingApp.Migrations;
 using ShippingApp.Models;
+using ShippingApp.RabbitMQ;
 
 namespace ShippingApp.Services
 {
     public class DriverService : IDriverService
     {
         private readonly ShippingDbContext _dbContext;
+        private readonly IRabbitMQProducer _rabbitMQProducer;
         Response response = new Response();
-        public DriverService(ShippingDbContext dbContext)
+        public DriverService(ShippingDbContext dbContext,IRabbitMQProducer rabbitMQProducer)
         {
             _dbContext = dbContext;
+            _rabbitMQProducer = rabbitMQProducer;
         }
         public Response AddDriver(Driver driver)
         {
@@ -90,6 +93,17 @@ namespace ShippingApp.Services
             }
             if (updateDriver.location != null) { driver.location = updateDriver.location; }
             driver.isAvailable = updateDriver.isAvailable;
+            var obj = _dbContext.Shippers.Where(s=>s.driverId == updateDriver.driverId).FirstOrDefault();
+            var shipmentStatus = new ShipmentStatusModel()
+            {
+                shipmentStatusId = Guid.NewGuid(),
+                shipmentId = obj.shipmentId,
+                shipmentStatus = "In transit",
+                currentLocation = updateDriver.location,
+                lastUpdated = DateTime.Now
+
+            };
+            _rabbitMQProducer.SendProductMessage(shipmentStatus);
             _dbContext.SaveChanges();
             response.Data = driver;
             response.StatusCode = 200;
