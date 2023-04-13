@@ -12,7 +12,7 @@ namespace ShippingApp.Data
         public DbSet<ContainerType> ContainerTypes { get; set; }
         public DbSet<Driver> Drivers { get; set; }
         public DbSet<Checkpoint> Checkpoints { get; set; }
-        public DbSet<Test> tests { get; set; }
+        public DbSet<ShippmentDriverMapping> Shippers { get; set; }
       
     }
 }
