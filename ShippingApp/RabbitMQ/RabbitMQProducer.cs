@@ -14,7 +14,7 @@ namespace ShippingApp.RabbitMQ
                 //HostName = "localhost"
                 HostName = "192.180.3.63",
                 Port = Protocols.DefaultProtocol.DefaultPort,
-                UserName = "guest",
+                UserName = "s3",
                 Password = "guest",
                 VirtualHost = "/",
                 ContinuationTimeout = new TimeSpan(10, 0, 0, 0)
