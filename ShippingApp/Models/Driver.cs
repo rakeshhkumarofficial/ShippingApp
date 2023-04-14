@@ -1,9 +1,12 @@
-﻿namespace ShippingApp.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace ShippingApp.Models
 {
     public class Driver
     {
+        [Key]
         public Guid driverId { get; set; }
-        public string location { get; set; } = string.Empty;
+        public Guid checkpointLocation { get; set; }
         public bool isAvailable { get; set; }
     }
 }

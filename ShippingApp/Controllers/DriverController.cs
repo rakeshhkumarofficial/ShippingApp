@@ -30,9 +30,9 @@ namespace ShippingApp.Controllers
         }
 
         [HttpGet]
-        public ActionResult Search(Guid driverId, string? location , bool isAvailable)
+        public ActionResult Search(Guid driverId, Guid checkpointLocation , bool isAvailable)
         {
-            var res = _driverService.GetDriver(driverId, location, isAvailable);
+            var res = _driverService.GetDriver(driverId, checkpointLocation, isAvailable);
             return Ok(res);
         }
 

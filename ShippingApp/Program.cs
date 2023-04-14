@@ -7,9 +7,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddScoped<IProductTypeService, ProductTypeService>();
+builder.Services.AddScoped<IDeliveryService, DeliveryService>();
 builder.Services.AddScoped<IContainerTypeService, ContainerTypeService>();
 builder.Services.AddScoped<IDriverService, DriverService>();
-builder.Services.AddScoped<ICheckpointService, CheckpointService>();
+//builder.Services.AddScoped<ICheckpointService, CheckpointService>();
 builder.Services.AddScoped<IRabbitMQProducer, RabbitMQProducer>();
 
 builder.Services.AddControllers();

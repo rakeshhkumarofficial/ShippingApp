@@ -26,9 +26,9 @@ namespace ShippingApp.Services
                 response.Message = "Please Enter Driver Id";
                 return response;
             }
-            if (driver.location == null || driver.location == "")
+            if (driver.checkpointLocation == Guid.Empty)
             {
-                response.Message = "Please Enter the Driver Location";
+                response.Message = "Please Enter the Driver CheckpointLocation";
                 return response;
             }
             bool IsUserExists = _dbContext.Drivers.Where(d=>d.driverId == driver.driverId).Any();
@@ -64,18 +64,18 @@ namespace ShippingApp.Services
             response.Message = "Driver is Deleted";
             return response;
         }
-        public Response GetDriver(Guid driverId, string? location, bool isAvailable)
+        public Response GetDriver(Guid driverId, Guid checkpointLocation, bool isAvailable)
         {
             response.IsSuccess = true;
             response.StatusCode = 200;
             response.Message = "Drivers List";
-            if (driverId == Guid.Empty && location == null)
+            if (driverId == Guid.Empty && checkpointLocation == Guid.Empty)
             {
                 var obj = _dbContext.Drivers;
                 response.Data = obj;
                 return response;
             }
-            var drivers = from driver in _dbContext.Drivers where ((driver.driverId == driverId || driverId == Guid.Empty) && (EF.Functions.Like(driver.location, "%" + location + "%") || location == null) && (driver.isAvailable == isAvailable)) select driver;
+            var drivers = from driver in _dbContext.Drivers where ((driver.driverId == driverId || driverId == Guid.Empty) && (driver.checkpointLocation == checkpointLocation || driver.checkpointLocation == Guid.Empty) && (driver.isAvailable == isAvailable)) select driver;
             response.Data = drivers;
             return response;
         }
@@ -91,7 +91,7 @@ namespace ShippingApp.Services
                 response.Message = "Driver Not Found";
                 return response;
             }
-            if (updateDriver.location != null) { driver.location = updateDriver.location; }
+            if (updateDriver.checkpointLocation != Guid.Empty) { driver.checkpointLocation = updateDriver.checkpointLocation; }
             driver.isAvailable = updateDriver.isAvailable;
             var obj = _dbContext.Shippers.Where(s=>s.driverId == updateDriver.driverId).FirstOrDefault();
             var shipmentStatus = new ShipmentStatusModel()
@@ -99,11 +99,21 @@ namespace ShippingApp.Services
                 shipmentStatusId = Guid.NewGuid(),
                 shipmentId = obj.shipmentId,
                 shipmentStatus = "In transit",
-                currentLocation = updateDriver.location,
+                currentLocation = updateDriver.checkpointLocation,
                 lastUpdated = DateTime.Now
 
             };
+
+            var shipper = new ShippmentDriverMapping()
+            {
+                mapId = Guid.NewGuid(),
+                shipmentId = obj.shipmentId,
+                driverId = driver.driverId,
+                checkpoint1Id = obj.checkpoint2Id,
+                checkpoint2Id = updateDriver.checkpointLocation,
+            };
             _rabbitMQProducer.SendProductMessage(shipmentStatus);
+            _dbContext.Shippers.Add(shipper);
             _dbContext.SaveChanges();
             response.Data = driver;
             response.StatusCode = 200;

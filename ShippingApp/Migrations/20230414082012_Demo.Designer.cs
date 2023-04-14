@@ -12,8 +12,8 @@ using ShippingApp.Data;
 namespace ShippingApp.Migrations
 {
     [DbContext(typeof(ShippingDbContext))]
-    [Migration("20230412130651_checkpoint")]
-    partial class checkpoint
+    [Migration("20230414082012_Demo")]
+    partial class Demo
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,21 +24,6 @@ namespace ShippingApp.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("ShippingApp.Models.Checkpoint", b =>
-                {
-                    b.Property<Guid>("checkpointId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("location")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("checkpointId");
-
-                    b.ToTable("Checkpoints");
-                });
 
             modelBuilder.Entity("ShippingApp.Models.ContainerType", b =>
                 {
@@ -64,12 +49,11 @@ namespace ShippingApp.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("checkpointLocation")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<bool>("isAvailable")
                         .HasColumnType("bit");
-
-                    b.Property<string>("location")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("driverId");
 
@@ -97,17 +81,27 @@ namespace ShippingApp.Migrations
                     b.ToTable("ProductTypes");
                 });
 
-            modelBuilder.Entity("ShippingApp.Models.Test", b =>
+            modelBuilder.Entity("ShippingApp.Models.ShippmentDriverMapping", b =>
                 {
-                    b.Property<int>("MyProperty")
+                    b.Property<Guid>("mapId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uniqueidentifier");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MyProperty"));
+                    b.Property<Guid>("checkpoint1Id")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("MyProperty");
+                    b.Property<Guid>("checkpoint2Id")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.ToTable("tests");
+                    b.Property<Guid>("driverId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("shipmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("mapId");
+
+                    b.ToTable("Shippers");
                 });
 #pragma warning restore 612, 618
         }
