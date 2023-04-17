@@ -94,6 +94,15 @@ namespace ShippingApp.Services
             if (updateDriver.checkpointLocation != Guid.Empty) { driver.checkpointLocation = updateDriver.checkpointLocation; }
             driver.isAvailable = updateDriver.isAvailable;
             var obj = _dbContext.Shippers.Where(s=>s.driverId == updateDriver.driverId).FirstOrDefault();
+            if (obj == null)
+            {
+                _dbContext.SaveChanges();
+                response.Data = driver;
+                response.StatusCode = 200;
+                response.IsSuccess = true;
+                response.Message = "Driver Details Updated";
+                return response;
+            }
             var shipmentStatus = new ShipmentStatusModel()
             {
                 shipmentStatusId = Guid.NewGuid(),
@@ -101,9 +110,11 @@ namespace ShippingApp.Services
                 shipmentStatus = "In transit",
                 currentLocation = updateDriver.checkpointLocation,
                 lastUpdated = DateTime.Now
-
             };
-
+            if(updateDriver.checkpointLocation == obj.checkpoint2Id)
+            {
+                shipmentStatus.shipmentStatus = "Delivered";
+            }        
             var shipper = new ShippmentDriverMapping()
             {
                 mapId = Guid.NewGuid(),

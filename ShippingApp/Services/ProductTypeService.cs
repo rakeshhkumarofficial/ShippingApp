@@ -75,8 +75,7 @@ namespace ShippingApp.Services
                 var obj = _dbContext.ProductTypes; 
                 response.Data = obj;
                 return response;
-            }
-           
+            }          
             var productTypes = from productType in _dbContext.ProductTypes where ((productType.productTypeId == productTypeId || productTypeId == Guid.Empty) && (EF.Functions.Like(productType.type, "%" + type + "%")|| type == null)) select productType;
             response.Data = productTypes;
             return response;

@@ -25,7 +25,10 @@ namespace ShippingApp.RabbitMQ
             using
             var channel = connection.CreateModel();
             //declare the queue
-            channel.QueueDeclare("shipmentStatus", exclusive: false);
+            channel.QueueDeclare("shipmentStatus", durable: true,
+                exclusive: false,
+                autoDelete: false,
+                arguments: null);
             //Serialize the message
             var json = JsonConvert.SerializeObject(message);
             var body = Encoding.UTF8.GetBytes(json);

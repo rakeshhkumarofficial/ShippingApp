@@ -11,15 +11,19 @@ namespace ShippingApp.Services
         {
             _dbContext = dbContext;
         }
-
         public Response AddDelivery(ShipmentDeliveryModel shipmentDelivery)
         {
             response.StatusCode = 200;
             response.IsSuccess = true;
             response.Message = "Delivery Service Added";
             var driver = _dbContext.Drivers.Where(d => (d.checkpointLocation == shipmentDelivery.shipment.origin) && d.isAvailable == true).FirstOrDefault();
-           // var checkpoint1 = _dbContext.Checkpoints.Where(c=>c.location.ToLower() == shipment.origin.ToLower()).FirstOrDefault();
-            //var checkpoint2 = _dbContext.Checkpoints.Where(c => c.location.ToLower() == shipment.destination.ToLower()).FirstOrDefault();
+            if(driver == null)
+            {
+                response.StatusCode = 404;
+                response.IsSuccess = false;
+                response.Message = " No Driver is avialable";
+                return response;
+            }
             var shipper = new ShippmentDriverMapping()
             {
                 mapId = Guid.NewGuid(),

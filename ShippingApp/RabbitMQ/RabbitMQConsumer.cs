@@ -39,15 +39,14 @@ namespace ShippingApp.RabbitMQ
                 // Rabbit MQ Server
                 var factory = new ConnectionFactory
                 {
-                    /*//HostName = "localhost"
                     HostName = "192.180.3.63",
                     Port = Protocols.DefaultProtocol.DefaultPort,
                     UserName = "s3",
                     Password = "guest",
                     VirtualHost = "/",
-                    ContinuationTimeout = new TimeSpan(10, 0, 0, 0)*/
-                    Uri
-                    = new Uri("amqp://s2:guest@192.180.3.63:5672")
+                    ContinuationTimeout = new TimeSpan(10, 0, 0, 0)
+                    /*Uri
+                    = new Uri("amqp://s2:guest@192.180.3.63:5672")*/
                 };
                 //RabbitMQ connection using connection factory
                 var connection = factory.CreateConnection();
@@ -68,8 +67,7 @@ namespace ShippingApp.RabbitMQ
                     var message = Encoding.UTF8.GetString(body);
                     Console.WriteLine($"message received: {message}");
                     ShipmentDeliveryModel shipmentDelivery = System.Text.Json.JsonSerializer.Deserialize<ShipmentDeliveryModel>(message)!;
-                    Console.WriteLine("hey " + shipmentDelivery.shipment.dateOfOrder +" "+ shipmentDelivery.checkpoints.First().longitude);
-                    
+                     Console.WriteLine("hey " + shipmentDelivery.shipment.dateOfOrder +" "+ shipmentDelivery.checkpoints.First().longitude);                   
                      var res = service!.AddDelivery(shipmentDelivery!);
                     
                 };
