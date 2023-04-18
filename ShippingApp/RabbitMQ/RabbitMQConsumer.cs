@@ -32,9 +32,7 @@ namespace ShippingApp.RabbitMQ
         }
         public void Consumer(string queueName)
         {
-            Console.WriteLine("1");
-            var scope = _scopeFactory.CreateScope();
-                Console.WriteLine("2");
+                var scope = _scopeFactory.CreateScope();
                 var service = scope.ServiceProvider.GetService<IDeliveryService>();
                 // Rabbit MQ Server
                 var factory = new ConnectionFactory
@@ -69,10 +67,18 @@ namespace ShippingApp.RabbitMQ
                     ShipmentDeliveryModel shipmentDelivery = System.Text.Json.JsonSerializer.Deserialize<ShipmentDeliveryModel>(message)!;
                      Console.WriteLine("hey " + shipmentDelivery.shipment.dateOfOrder +" "+ shipmentDelivery.checkpoints.First().longitude);                   
                      var res = service!.AddDelivery(shipmentDelivery!);
+                    if (res.Data == null)
+                    {
+                        channel.BasicNack(deliveryTag:eventArgs.DeliveryTag, multiple: false, requeue: true);
+                    }
+                    else
+                    {
+                        channel.BasicAck(deliveryTag: eventArgs.DeliveryTag, multiple: false);
+                    }
                     
                 };
                 //read the message
-                channel.BasicConsume(queue: queueName, autoAck: true, consumer: consumer);
+                channel.BasicConsume(queue: queueName, autoAck: false, consumer: consumer);
                 Console.ReadLine();
             
         }

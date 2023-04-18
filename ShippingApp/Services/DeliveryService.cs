@@ -16,9 +16,11 @@ namespace ShippingApp.Services
             response.StatusCode = 200;
             response.IsSuccess = true;
             response.Message = "Delivery Service Added";
+            response.Data = shipmentDelivery;
             var driver = _dbContext.Drivers.Where(d => (d.checkpointLocation == shipmentDelivery.shipment.origin) && d.isAvailable == true).FirstOrDefault();
             if(driver == null)
             {
+                response.Data = null;
                 response.StatusCode = 404;
                 response.IsSuccess = false;
                 response.Message = " No Driver is avialable";
