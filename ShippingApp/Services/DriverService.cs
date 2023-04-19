@@ -80,7 +80,7 @@ namespace ShippingApp.Services
             return response;
         }
 
-        public Response UpdateDriver(Driver updateDriver)
+        public Response UpdateDriver(UpdateDriverRequest updateDriver)
         {
             response.Data = null;
             response.StatusCode = 404;
@@ -92,6 +92,7 @@ namespace ShippingApp.Services
                 return response;
             }
             if (updateDriver.checkpointLocation != Guid.Empty) { driver.checkpointLocation = updateDriver.checkpointLocation; }
+            
             driver.isAvailable = updateDriver.isAvailable;
             var obj = _dbContext.Shippers.Where(s=>s.driverId == updateDriver.driverId).FirstOrDefault();
             if (obj == null)
@@ -107,24 +108,14 @@ namespace ShippingApp.Services
             {
                 shipmentStatusId = Guid.NewGuid(),
                 shipmentId = obj.shipmentId,
-                shipmentStatus = "In transit",
+                shipmentStatus = "Accepted",
                 currentLocation = updateDriver.checkpointLocation,
                 lastUpdated = DateTime.Now
             };
-            if(updateDriver.checkpointLocation == obj.checkpoint2Id)
-            {
-                shipmentStatus.shipmentStatus = "Delivered";
-            }        
-            var shipper = new ShippmentDriverMapping()
-            {
-                mapId = Guid.NewGuid(),
-                shipmentId = obj.shipmentId,
-                driverId = driver.driverId,
-                checkpoint1Id = obj.checkpoint2Id,
-                checkpoint2Id = updateDriver.checkpointLocation,
-            };
+            if (updateDriver.shipmentStatus != null || updateDriver.shipmentStatus != "") {
+                shipmentStatus.shipmentStatus = updateDriver.shipmentStatus;
+            }                           
             _rabbitMQProducer.SendProductMessage(shipmentStatus);
-            _dbContext.Shippers.Add(shipper);
             _dbContext.SaveChanges();
             response.Data = driver;
             response.StatusCode = 200;

@@ -37,7 +37,7 @@ namespace ShippingApp.Controllers
         }
 
         [HttpPut]
-        public ActionResult Update(Driver updateDriver)
+        public ActionResult Update(UpdateDriverRequest updateDriver)
         {
             var res = _driverService.UpdateDriver(updateDriver);
             return Ok(res);
