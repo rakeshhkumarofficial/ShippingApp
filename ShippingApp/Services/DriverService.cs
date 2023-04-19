@@ -112,10 +112,24 @@ namespace ShippingApp.Services
                 currentLocation = updateDriver.checkpointLocation,
                 lastUpdated = DateTime.Now
             };
-            if (updateDriver.shipmentStatus != null || updateDriver.shipmentStatus != "") {
-                shipmentStatus.shipmentStatus = updateDriver.shipmentStatus;
-            }                           
-            _rabbitMQProducer.SendProductMessage(shipmentStatus);
+            if(updateDriver.checkpointLocation==obj.checkpoint1Id)
+            {
+                shipmentStatus.shipmentStatus = "Picked Up";
+            }
+            if(updateDriver.checkpointLocation != obj.checkpoint1Id)
+            {
+                if(updateDriver.checkpointLocation == obj.checkpoint2Id)
+                {
+                    shipmentStatus.shipmentStatus = "Delivered";
+                    driver.isAvailable = true;
+                }
+                else
+                {
+                    shipmentStatus.shipmentStatus = "In Transit";
+                }
+            }
+                                     
+            _rabbitMQProducer.SendStatusMessage(shipmentStatus);
             _dbContext.SaveChanges();
             response.Data = driver;
             response.StatusCode = 200;

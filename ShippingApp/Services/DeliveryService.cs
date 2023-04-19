@@ -53,7 +53,7 @@ namespace ShippingApp.Services
                 driverId = driver.driverId,
                 shipmentId = shipper.shipmentId
             };
-            _rabbitMQProducer.SendProductMessage(shipmentStatus);
+            _rabbitMQProducer.SendStatusMessage(shipmentStatus);
             _rabbitMQProducer.SendDriverMessage(notifyDriver);
             _dbContext.Shippers.Add(shipper);
             driver.isAvailable = false;

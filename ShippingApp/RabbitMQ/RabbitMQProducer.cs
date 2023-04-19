@@ -37,7 +37,7 @@ namespace ShippingApp.RabbitMQ
 
         }
 
-        public void SendProductMessage<T>(T message)
+        public void SendStatusMessage<T>(T message)
         {
             //Rabbit MQ Server
             var factory = new ConnectionFactory
