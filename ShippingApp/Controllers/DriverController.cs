@@ -42,5 +42,15 @@ namespace ShippingApp.Controllers
             var res = _driverService.UpdateDriver(updateDriver);
             return Ok(res);
         }
+
+
+        [HttpGet]
+        public ActionResult GetShippers(Guid id)
+        {
+            GetShippersRequest temp = new GetShippersRequest(id);
+            var res = _driverService.GetShippers(temp);
+            return Ok(res);
+        }
+
     }
 }

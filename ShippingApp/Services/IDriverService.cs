@@ -8,5 +8,6 @@ namespace ShippingApp.Services
         public Response DeleteDriver(Guid driverId);
         public Response GetDriver(Guid driverId, Guid checkpointLocation, bool isAvailable);
         public Response UpdateDriver(UpdateDriverRequest updateDriver);
+        public Response GetShippers(GetShippersRequest shipper);
     }
 }

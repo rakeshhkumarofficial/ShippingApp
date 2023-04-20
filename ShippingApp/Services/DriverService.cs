@@ -80,6 +80,32 @@ namespace ShippingApp.Services
             return response;
         }
 
+        public Response GetShippers(GetShippersRequest shipper)
+        {
+            response.Data = null;
+            response.StatusCode = 404;
+            response.IsSuccess = false;
+            var driver = _dbContext.Drivers.Find(shipper.driverId);
+            if (driver == null)
+            {
+                response.Message = "Driver Not Found";
+                return response;
+            }
+            var shippers = _dbContext.Shippers.Where(s=>s.driverId == driver.driverId).Select(s=>s.shipmentId).ToList(); 
+            if(shippers.Count == 0) {
+                response.Data = null;
+                response.StatusCode = 200;
+                response.IsSuccess = true;
+                response.Message = "Don't have any shipments right now";
+                return response;
+            }
+            response.Data = shippers;
+            response.StatusCode = 200;
+            response.IsSuccess = true;
+            response.Message = "Shipments";
+            return response;
+        }
+
         public Response UpdateDriver(UpdateDriverRequest updateDriver)
         {
             response.Data = null;

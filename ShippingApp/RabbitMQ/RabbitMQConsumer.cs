@@ -22,6 +22,7 @@ namespace ShippingApp.RabbitMQ
         public Task StartAsync(CancellationToken cancellationToken)
         {
             Task.Run(() => Consumer("shipmentDelivery"));
+
             return Task.CompletedTask;
         }
 
@@ -74,8 +75,7 @@ namespace ShippingApp.RabbitMQ
                     else
                     {
                         channel.BasicAck(deliveryTag: eventArgs.DeliveryTag, multiple: false);
-                    }
-                    
+                    }                  
                 };
                 //read the message
                 channel.BasicConsume(queue: queueName, autoAck: false, consumer: consumer);

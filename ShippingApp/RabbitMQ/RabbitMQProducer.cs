@@ -36,7 +36,6 @@ namespace ShippingApp.RabbitMQ
             channel.BasicPublish(exchange: "", routingKey: "notifyDriver", body: body);
 
         }
-
         public void SendStatusMessage<T>(T message)
         {
             //Rabbit MQ Server

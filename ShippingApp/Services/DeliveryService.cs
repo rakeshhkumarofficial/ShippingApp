@@ -23,7 +23,7 @@ namespace ShippingApp.Services
             response.IsSuccess = true;
             response.Message = "Delivery Service Added";
             response.Data = shipmentDelivery;
-            var driver = _dbContext.Drivers.Where(d => (d.checkpointLocation == shipmentDelivery.shipment.origin) && d.isAvailable == true).FirstOrDefault();
+            var driver = _dbContext.Drivers.Where(d => d.isAvailable == true && d.checkpointLocation == shipmentDelivery.shipment.origin ).FirstOrDefault();
             if(driver == null)
             {
                 response.Data = null;
@@ -48,16 +48,18 @@ namespace ShippingApp.Services
                 currentLocation = shipper.checkpoint1Id,
                 lastUpdated = DateTime.Now
             };
+            
+            _rabbitMQProducer.SendStatusMessage(shipmentStatus);
+            _dbContext.Shippers.Add(shipper);
+            driver.isAvailable = false;
+            _dbContext.SaveChanges();
             var notifyDriver = new NotifyDriver()
             {
                 driverId = driver.driverId,
                 shipmentId = shipper.shipmentId
             };
-            _rabbitMQProducer.SendStatusMessage(shipmentStatus);
+            
             _rabbitMQProducer.SendDriverMessage(notifyDriver);
-            _dbContext.Shippers.Add(shipper);
-            driver.isAvailable = false;
-            _dbContext.SaveChanges();
             response.Data = shipper;
             return response;
         }
