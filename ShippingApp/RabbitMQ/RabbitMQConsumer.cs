@@ -64,18 +64,17 @@ namespace ShippingApp.RabbitMQ
                 {
                     var body = eventArgs.Body.ToArray();
                     var message = Encoding.UTF8.GetString(body);
-                    Console.WriteLine($"message received: {message}");
+                   Console.WriteLine($"message received: {message}");
                     ShipmentDeliveryModel shipmentDelivery = System.Text.Json.JsonSerializer.Deserialize<ShipmentDeliveryModel>(message)!;
-                     Console.WriteLine("hey " + shipmentDelivery.shipment.dateOfOrder +" "+ shipmentDelivery.checkpoints.First().longitude);                   
-                     var res = service!.AddDelivery(shipmentDelivery!);
+                    var res = service!.AddDelivery(shipmentDelivery!);
                     if (res.Data == null)
                     {
-                        channel.BasicNack(deliveryTag:eventArgs.DeliveryTag, multiple: false, requeue: true);
+                        channel.BasicNack(deliveryTag: eventArgs.DeliveryTag, multiple: false, requeue: true);
                     }
                     else
                     {
                         channel.BasicAck(deliveryTag: eventArgs.DeliveryTag, multiple: false);
-                    }                  
+                    }
                 };
                 //read the message
                 channel.BasicConsume(queue: queueName, autoAck: false, consumer: consumer);

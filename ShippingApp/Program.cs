@@ -12,6 +12,8 @@ builder.Services.AddScoped<IContainerTypeService, ContainerTypeService>();
 builder.Services.AddScoped<IDriverService, DriverService>();
 //builder.Services.AddScoped<ICheckpointService, CheckpointService>();
 builder.Services.AddScoped<IRabbitMQProducer, RabbitMQProducer>();
+builder.Services.AddScoped<IAPIGatewayService, APIGatewayService>();
+
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

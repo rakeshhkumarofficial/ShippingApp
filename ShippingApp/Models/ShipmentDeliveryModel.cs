@@ -2,7 +2,7 @@
 {
     public class ShipmentDeliveryModel
     {
-        public ShipmentModel shipment { get; set; } 
+        public SendShipmentModel shipment { get; set; } 
         public List<CheckpointModel> checkpoints { get; set; } 
     }
 }

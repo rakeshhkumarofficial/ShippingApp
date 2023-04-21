@@ -2,7 +2,6 @@
 {
     public class NotifyDriver
     {
-        public Guid driverId { get; set; }
-        public Guid shipmentId { get; set; }
+        public List<Guid> driverIds { get; set; }
     }
 }

@@ -10,10 +10,12 @@ namespace ShippingApp.Controllers
     public class DriverController : ControllerBase
     {
         private readonly IDriverService _driverService;
+        private readonly IAPIGatewayService _gatewayService;
 
-        public DriverController(IDriverService driverService)
+        public DriverController(IDriverService driverService, IAPIGatewayService gatewayService)
         {
             _driverService = driverService;
+            _gatewayService = gatewayService;
         }
         [HttpPost]
         public ActionResult Add(Driver driver)
@@ -49,6 +51,20 @@ namespace ShippingApp.Controllers
         {
             GetShippersRequest temp = new GetShippersRequest(id);
             var res = _driverService.GetShippers(temp);
+            return Ok(res);
+        }
+
+        [HttpPut]
+        public ActionResult AcceptShipment(AcceptShipmentRequest request)
+        {
+            var res = _driverService.AcceptShipment(request);
+            return Ok(res);
+        }
+
+        [HttpGet]
+        public ActionResult GetShipmentRoute(Guid shipmentId)
+        {          
+            var res = _gatewayService.GetCheckpoints(shipmentId);
             return Ok(res);
         }
 

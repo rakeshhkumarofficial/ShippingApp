@@ -15,16 +15,14 @@ namespace ShippingApp.Services
             _rabbitMQProducer = rabbitMQProducer;
         }
 
-        
-
         public Response AddDelivery(ShipmentDeliveryModel shipmentDelivery)
         {
             response.StatusCode = 200;
             response.IsSuccess = true;
             response.Message = "Delivery Service Added";
             response.Data = shipmentDelivery;
-            var driver = _dbContext.Drivers.Where(d => d.isAvailable == true && d.checkpointLocation == shipmentDelivery.shipment.origin ).FirstOrDefault();
-            if(driver == null)
+            var drivers = _dbContext.Drivers.Where(d => d.isAvailable == true && d.checkpointLocation == shipmentDelivery.shipment.origin).Select(d => d.driverId).ToList();
+            if (drivers.Count() == 0)
             {
                 response.Data = null;
                 response.StatusCode = 404;
@@ -36,32 +34,37 @@ namespace ShippingApp.Services
             {
                 mapId = Guid.NewGuid(),
                 shipmentId = shipmentDelivery.shipment.shipmentId,
-                driverId = driver.driverId,
+                productType = shipmentDelivery.shipment.productType,
+                containerType = shipmentDelivery.shipment.containerType,
+                shipmentWeight = shipmentDelivery.shipment.shipmentWeight,
+                isAccepted = false,
+                isActive = true,
+                driverId = Guid.Empty,
                 checkpoint1Id = shipmentDelivery.shipment.origin,
-                checkpoint2Id = shipmentDelivery.shipment.destination,
+                checkpoint2Id = shipmentDelivery.checkpoints[1].checkpointId
             };
-            var shipmentStatus = new ShipmentStatusModel()
+            /*var shipmentStatus = new ShipmentStatusModel()
             {
                 shipmentStatusId = Guid.NewGuid(),
                 shipmentId = shipper.shipmentId,
                 shipmentStatus = "Accepted",
                 currentLocation = shipper.checkpoint1Id,
                 lastUpdated = DateTime.Now
-            };
-            
-            _rabbitMQProducer.SendStatusMessage(shipmentStatus);
+            };*/
+
+            //_rabbitMQProducer.SendStatusMessage(shipmentStatus);
             _dbContext.Shippers.Add(shipper);
-            driver.isAvailable = false;
             _dbContext.SaveChanges();
             var notifyDriver = new NotifyDriver()
             {
-                driverId = driver.driverId,
-                shipmentId = shipper.shipmentId
+                driverIds = drivers,
             };
-            
+
             _rabbitMQProducer.SendDriverMessage(notifyDriver);
             response.Data = shipper;
             return response;
         }
+
+       
     }
 }

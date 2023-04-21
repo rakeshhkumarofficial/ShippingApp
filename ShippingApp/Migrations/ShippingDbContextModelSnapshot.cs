@@ -90,11 +90,28 @@ namespace ShippingApp.Migrations
                     b.Property<Guid>("checkpoint2Id")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("containerType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid>("driverId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("isAccepted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("isActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("productType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid>("shipmentId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<float>("shipmentWeight")
+                        .HasColumnType("real");
 
                     b.HasKey("mapId");
 

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ShippingApp.Migrations
 {
     /// <inheritdoc />
-    public partial class Shippers : Migration
+    public partial class shipper : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,6 +17,11 @@ namespace ShippingApp.Migrations
                 {
                     mapId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     shipmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    productType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    containerType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    shipmentWeight = table.Column<float>(type: "real", nullable: false),
+                    isAccepted = table.Column<bool>(type: "bit", nullable: false),
+                    isActive = table.Column<bool>(type: "bit", nullable: false),
                     driverId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     checkpoint1Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     checkpoint2Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
