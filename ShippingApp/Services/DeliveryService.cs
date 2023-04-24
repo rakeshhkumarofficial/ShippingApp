@@ -22,14 +22,14 @@ namespace ShippingApp.Services
             response.Message = "Delivery Service Added";
             response.Data = shipmentDelivery;
             var drivers = _dbContext.Drivers.Where(d => d.isAvailable == true && d.checkpointLocation == shipmentDelivery.shipment.origin).Select(d => d.driverId).ToList();
-            if (drivers.Count() == 0)
+            /*if (drivers.Count() == 0)
             {
                 response.Data = null;
                 response.StatusCode = 404;
                 response.IsSuccess = false;
                 response.Message = " No Driver is avialable";
                 return response;
-            }
+            }*/
             var shipper = new ShippmentDriverMapping()
             {
                 mapId = Guid.NewGuid(),
@@ -43,23 +43,13 @@ namespace ShippingApp.Services
                 checkpoint1Id = shipmentDelivery.shipment.origin,
                 checkpoint2Id = shipmentDelivery.checkpoints[1].checkpointId
             };
-            /*var shipmentStatus = new ShipmentStatusModel()
-            {
-                shipmentStatusId = Guid.NewGuid(),
-                shipmentId = shipper.shipmentId,
-                shipmentStatus = "Accepted",
-                currentLocation = shipper.checkpoint1Id,
-                lastUpdated = DateTime.Now
-            };*/
-
-            //_rabbitMQProducer.SendStatusMessage(shipmentStatus);
+            
             _dbContext.Shippers.Add(shipper);
             _dbContext.SaveChanges();
             var notifyDriver = new NotifyDriver()
             {
                 driverIds = drivers,
             };
-
             _rabbitMQProducer.SendDriverMessage(notifyDriver);
             response.Data = shipper;
             return response;

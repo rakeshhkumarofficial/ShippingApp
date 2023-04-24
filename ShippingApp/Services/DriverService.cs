@@ -83,23 +83,22 @@ namespace ShippingApp.Services
             return response;
         }
 
-        public Response GetShippers(GetShippersRequest shipper)
+        public Response GetShippers(Guid checkpointLocation)
         {
             response.Data = null;
             response.StatusCode = 404;
             response.IsSuccess = false;
-            var driver = _dbContext.Drivers.Find(shipper.driverId);
-            if (driver == null)
+            if (checkpointLocation == Guid.Empty)
             {
-                response.Message = "Driver Not Found";
+                response.Message = "Please enter the location";
                 return response;
             }
-            var shippers = _dbContext.Shippers.Where(s=>s.driverId == driver.driverId).Select(s=>s.shipmentId).ToList(); 
+            var shippers = _dbContext.Shippers.Where(s=>s.checkpoint1Id == checkpointLocation && s.isAccepted == false && s.isActive == true).Select(s=>s).ToList(); 
             if(shippers.Count == 0) {
                 response.Data = null;
                 response.StatusCode = 200;
                 response.IsSuccess = true;
-                response.Message = "Don't have any shipments right now";
+                response.Message = "Don't have any shipments right now in your Location";
                 return response;
             }
             response.Data = shippers;
@@ -132,6 +131,20 @@ namespace ShippingApp.Services
                 response.Message = "Driver location Updated";
                 return response;
             }
+            float totalWeight = 0;
+            foreach (var shipment in obj)
+            {
+                totalWeight = totalWeight + shipment.shipmentWeight;
+            }
+            if(totalWeight < 17000)
+            {
+                response.Data = null;
+                response.StatusCode = 400;
+                response.IsSuccess = false;
+                response.Message = "Fill the container atleast 70% to move on.";
+                return response;
+            }
+
             foreach (var item in obj)
             {
                 var shipmentStatus = new ShipmentStatusModel()
@@ -142,6 +155,8 @@ namespace ShippingApp.Services
                     currentLocation = updateDriver.checkpointLocation,
                     lastUpdated = DateTime.Now
                 };
+                item.isActive = false;
+                _dbContext.SaveChanges();
                 var shipmentRoute = _gatewayService.GetCheckpoints(item.shipmentId);
                 int len = shipmentRoute.Count;
                 int i = 0;
@@ -223,6 +238,7 @@ namespace ShippingApp.Services
             {
                 shipper.driverId = request.driverId;
                 shipper.isAccepted = request.isAccepted;
+                driver.isAvailable = true;
                 _dbContext.SaveChanges();
                 response.Data = shipper;
                 response.Message = "shipment Accepted";
@@ -234,11 +250,20 @@ namespace ShippingApp.Services
             {
                 shipper.driverId = request.driverId;
                 shipper.isAccepted = request.isAccepted;
+                driver.isAvailable = true;
                 _dbContext.SaveChanges();
                 response.Data = shipper;        
                 response.Message = "shipment Accepted";
                 response.IsSuccess = true;
                 response.StatusCode = 200;
+                return response;
+            }
+            if(shipper.shipmentWeight + totalWeight > 25000)
+            {
+                response.Data = shipper;
+                response.Message = "Cannot Accept the shipment. Container is full.";
+                response.IsSuccess = false;
+                response.StatusCode = 400;              
             }
             return response;
         }

@@ -47,10 +47,9 @@ namespace ShippingApp.Controllers
 
 
         [HttpGet]
-        public ActionResult GetShippers(Guid id)
-        {
-            GetShippersRequest temp = new GetShippersRequest(id);
-            var res = _driverService.GetShippers(temp);
+        public ActionResult GetShippers(Guid checkpointLocation)
+        {          
+            var res = _driverService.GetShippers(checkpointLocation);
             return Ok(res);
         }
 
