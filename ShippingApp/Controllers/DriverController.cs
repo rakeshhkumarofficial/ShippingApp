@@ -32,9 +32,9 @@ namespace ShippingApp.Controllers
         }
 
         [HttpGet]
-        public ActionResult Search(Guid driverId, Guid checkpointLocation , bool isAvailable)
+        public ActionResult Search(Guid driverId , Guid checkpointLocation)
         {
-            var res = _driverService.GetDriver(driverId, checkpointLocation, isAvailable);
+            var res = _driverService.GetDriver(driverId, checkpointLocation);
             return Ok(res);
         }
 
@@ -47,9 +47,9 @@ namespace ShippingApp.Controllers
 
 
         [HttpGet]
-        public ActionResult GetShippers(Guid checkpointLocation)
+        public ActionResult GetShippers(Guid checkpointLocation, Guid driverId)
         {          
-            var res = _driverService.GetShippers(checkpointLocation);
+            var res = _driverService.GetShippers(checkpointLocation, driverId);
             return Ok(res);
         }
 
@@ -63,7 +63,15 @@ namespace ShippingApp.Controllers
         [HttpGet]
         public ActionResult GetShipmentRoute(Guid shipmentId)
         {          
-            var res = _gatewayService.GetCheckpoints(shipmentId);
+            var res = _gatewayService.GetShipmentRoute(shipmentId);
+            return Ok(res);
+        }
+
+
+        [HttpGet]
+        public ActionResult GetCheckpoints(Guid checkpointId)
+        {
+            var res = _gatewayService.GetCheckpoints(checkpointId);
             return Ok(res);
         }
 

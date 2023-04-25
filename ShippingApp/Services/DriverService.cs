@@ -67,41 +67,95 @@ namespace ShippingApp.Services
             response.Message = "Driver is Deleted";
             return response;
         }
-        public Response GetDriver(Guid driverId, Guid checkpointLocation, bool isAvailable)
+        public Response GetDriver(Guid driverId, Guid checkpointLocation)
         {
             response.IsSuccess = true;
             response.StatusCode = 200;
             response.Message = "Drivers List";
-            if (driverId == Guid.Empty && checkpointLocation == Guid.Empty)
+            var drivers = _dbContext.Drivers.Where(d => (d.driverId == driverId || driverId == Guid.Empty) && (d.checkpointLocation == checkpointLocation || checkpointLocation == Guid.Empty)).Select(d => d).ToList();
+            if(drivers.Count == 0)
             {
-                var obj = _dbContext.Drivers;
-                response.Data = obj;
+                response.IsSuccess = false;
+                response.StatusCode = 404;
+                response.Message = "Drivers Not Found";
+                response.Data = null;
                 return response;
             }
-            var drivers = from driver in _dbContext.Drivers where ((driver.driverId == driverId || driverId == Guid.Empty) && (driver.checkpointLocation == checkpointLocation || driver.checkpointLocation == Guid.Empty) && (driver.isAvailable == isAvailable)) select driver;
             response.Data = drivers;
             return response;
         }
 
-        public Response GetShippers(Guid checkpointLocation)
+        public Response GetShippers(Guid checkpointLocation,Guid driverId)
         {
             response.Data = null;
             response.StatusCode = 404;
             response.IsSuccess = false;
+            if (driverId != Guid.Empty)
+            {
+                var shippersDriver = _dbContext.Shippers.Where(s => s.driverId == driverId).Select(s => s).ToList();
+                List<GetShippersResponse> Shippers = new List<GetShippersResponse>();
+                foreach (var shipper in shippersDriver)
+                {
+                    var checkpointLocation1 = _gatewayService.GetCheckpoints(shipper.checkpoint1Id);
+                    var checkpointLocation2 = _gatewayService.GetCheckpoints(shipper.checkpoint2Id);
+                    GetShippersResponse response = new GetShippersResponse()
+                    {
+                        mapId = shipper.mapId,
+                        shipmentId = shipper.shipmentId,
+                        productType = shipper.productType,
+                        containerType = shipper.containerType,
+                        shipmentWeight = shipper.shipmentWeight,
+                        isAccepted = shipper.isAccepted,
+                        isActive = shipper.isActive,
+                        driverId = shipper.driverId,
+                        checkpoint1Id = checkpointLocation1[0].checkpointName,
+                        checkpoint2Id = checkpointLocation2[0].checkpointName
+                    };
+                    Shippers.Add(response);
+                }
+                response.Data = Shippers;
+                response.StatusCode = 200;
+                response.IsSuccess = true;
+                response.Message = "Shipments";
+                return response;
+            }
+
             if (checkpointLocation == Guid.Empty)
             {
                 response.Message = "Please enter the location";
                 return response;
             }
+
             var shippers = _dbContext.Shippers.Where(s=>s.checkpoint1Id == checkpointLocation && s.isAccepted == false && s.isActive == true).Select(s=>s).ToList(); 
             if(shippers.Count == 0) {
                 response.Data = null;
-                response.StatusCode = 200;
-                response.IsSuccess = true;
+                response.StatusCode = 404;
+                response.IsSuccess = false;
                 response.Message = "Don't have any shipments right now in your Location";
                 return response;
             }
-            response.Data = shippers;
+            List<GetShippersResponse> ShipperList= new List< GetShippersResponse>();
+            foreach(var shipper in shippers)
+            {
+                var checkpointLocation1 = _gatewayService.GetCheckpoints(shipper.checkpoint1Id);
+                var checkpointLocation2 = _gatewayService.GetCheckpoints(shipper.checkpoint2Id);
+                GetShippersResponse response = new GetShippersResponse()
+                {
+                    mapId = shipper.mapId,
+                    shipmentId = shipper.shipmentId,
+                    productType = shipper.productType,
+                    containerType = shipper.containerType,
+                    shipmentWeight = shipper.shipmentWeight,
+                    isAccepted = shipper.isAccepted,
+                    isActive = shipper.isActive,
+                    driverId = shipper.driverId,
+                    checkpoint1Id = checkpointLocation1[0].checkpointName,
+                    checkpoint2Id = checkpointLocation2[0].checkpointName
+                };
+                ShipperList.Add(response);
+            }
+
+            response.Data = ShipperList;
             response.StatusCode = 200;
             response.IsSuccess = true;
             response.Message = "Shipments";
@@ -120,9 +174,10 @@ namespace ShippingApp.Services
                 return response;
             }
             if (updateDriver.checkpointLocation != Guid.Empty) { driver.checkpointLocation = updateDriver.checkpointLocation; }
-            var obj = _dbContext.Shippers.Where(s => s.driverId == driver.driverId && s.checkpoint1Id == driver.checkpointLocation && s.isActive == true && s.isAccepted == true).Select(s => s);
-            if (obj.Count() == 0)
+            var obj = _dbContext.Shippers.Where(s => s.driverId == driver.driverId && s.checkpoint1Id == driver.checkpointLocation && s.isActive == true && s.isAccepted == true).Select(s => s).ToList();
+            if (obj.Count == 0)
             {
+
                 driver.isAvailable = true;
                 _dbContext.SaveChanges();
                 response.Data = driver;
@@ -198,7 +253,7 @@ namespace ShippingApp.Services
 
                 _rabbitMQProducer.SendStatusMessage(shipmentStatus);
                 _dbContext.Shippers.Add(shipper);
-                driver.isAvailable = false;
+                //driver.isAvailable = false;
                 _dbContext.SaveChanges();
             }
             response.Data = driver;
@@ -210,8 +265,8 @@ namespace ShippingApp.Services
         public Response AcceptShipment(AcceptShipmentRequest request)
         {
             response.Data = null;
-            response.IsSuccess = true;
-            response.StatusCode = 200;
+            response.IsSuccess = false;
+            response.StatusCode = 400;
             if (request.mapId == Guid.Empty)
             {
                 response.Message = "Please enter the MapId";
@@ -223,19 +278,25 @@ namespace ShippingApp.Services
                 return response;
             }
             var shipper = _dbContext.Shippers.Where(s => s.mapId == request.mapId).FirstOrDefault();
+              
             if (shipper == null)
             {
                 response.Message = "Shipment does not exist";
                 return response;
             }
-            var driver = _dbContext.Drivers.Where(d => d.driverId == request.driverId).FirstOrDefault();
-            var hasShipment = _dbContext.Shippers.Where(s => s.driverId == request.driverId && s.checkpoint1Id== driver.checkpointLocation && s.isActive == true && s.containerType == shipper.containerType && s.isAccepted == true).Select(s=>s);
-            float totalWeight = 0;
-            foreach (var shipment in hasShipment) {
-                totalWeight = totalWeight + shipment.shipmentWeight;
-            }
-            if(hasShipment.Count() == 0)
+            var driver = _dbContext.Drivers.Find(request.driverId);
+            var hasShipment = _dbContext.Shippers.Where(s => ((s.driverId == request.driverId) && (s.checkpoint1Id == driver.checkpointLocation) && (s.isActive == true) && (s.isAccepted == true))).Select(s => s).ToList();
+            if (hasShipment.Count == 0)
             {
+                var shipmentStatus = new ShipmentStatusModel()
+                {
+                    shipmentStatusId = Guid.NewGuid(),
+                    shipmentId = shipper.shipmentId,
+                    shipmentStatus = "Accepted",
+                    currentLocation = shipper.checkpoint1Id,
+                    lastUpdated = DateTime.Now
+                };
+                _rabbitMQProducer.SendStatusMessage(shipmentStatus);
                 shipper.driverId = request.driverId;
                 shipper.isAccepted = request.isAccepted;
                 driver.isAvailable = true;
@@ -246,8 +307,31 @@ namespace ShippingApp.Services
                 response.StatusCode = 200;
                 return response;
             }
+            if(hasShipment.First().containerType !=shipper.containerType)
+            {
+                response.Message = " Container Type Does Not Match";
+                return response;
+            }
+            if (hasShipment.First().checkpoint2Id != shipper.checkpoint2Id)
+            {
+                response.Message = " Destination Does Not Match";
+                return response;
+            }
+            float totalWeight = 0;
+            foreach (var shipment in hasShipment) {
+                totalWeight = totalWeight + shipment.shipmentWeight;
+            }
             if(shipper.shipmentWeight + totalWeight <= 25000)
             {
+                var shipmentStatus = new ShipmentStatusModel()
+                {
+                    shipmentStatusId = Guid.NewGuid(),
+                    shipmentId = shipper.shipmentId,
+                    shipmentStatus = "Accepted",
+                    currentLocation = shipper.checkpoint1Id,
+                    lastUpdated = DateTime.Now
+                };
+                _rabbitMQProducer.SendStatusMessage(shipmentStatus);
                 shipper.driverId = request.driverId;
                 shipper.isAccepted = request.isAccepted;
                 driver.isAvailable = true;
@@ -260,7 +344,7 @@ namespace ShippingApp.Services
             }
             if(shipper.shipmentWeight + totalWeight > 25000)
             {
-                response.Data = shipper;
+                response.Data = null;
                 response.Message = "Cannot Accept the shipment. Container is full.";
                 response.IsSuccess = false;
                 response.StatusCode = 400;              

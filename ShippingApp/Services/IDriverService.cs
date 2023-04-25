@@ -6,9 +6,9 @@ namespace ShippingApp.Services
     {
         public Response AddDriver(Driver driver);
         public Response DeleteDriver(Guid driverId);
-        public Response GetDriver(Guid driverId, Guid checkpointLocation, bool isAvailable);
+        public Response GetDriver(Guid driverId, Guid checkpointLocation);
         public Response UpdateDriver(UpdateDriverRequest updateDriver);
-        public Response GetShippers(Guid checkpointLocation);
+        public Response GetShippers(Guid checkpointLocation, Guid driverId);
         public Response AcceptShipment(AcceptShipmentRequest request);
     }
 }
