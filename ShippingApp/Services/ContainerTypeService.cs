@@ -22,7 +22,7 @@ namespace ShippingApp.Services
             response.IsSuccess = false;
             if (addContainer.containerName == null || addContainer.containerName == "" || addContainer == null)
             {
-                response.Message = "Please Enter the Conatiner Type";
+                response.Message = "Please Enter the Container Type";
                 return response;
             }
             if(addContainer.price == 0)

@@ -22,14 +22,6 @@ namespace ShippingApp.Services
             response.Message = "Delivery Service Added";
             response.Data = shipmentDelivery;
             var drivers = _dbContext.Drivers.Where(d => d.isAvailable == true && d.checkpointLocation == shipmentDelivery.shipment.origin).Select(d => d.driverId).ToList();
-            /*if (drivers.Count() == 0)
-            {
-                response.Data = null;
-                response.StatusCode = 404;
-                response.IsSuccess = false;
-                response.Message = " No Driver is avialable";
-                return response;
-            }*/
             var shipper = new ShippmentDriverMapping()
             {
                 mapId = Guid.NewGuid(),
@@ -41,7 +33,8 @@ namespace ShippingApp.Services
                 isActive = true,
                 driverId = Guid.Empty,
                 checkpoint1Id = shipmentDelivery.shipment.origin,
-                checkpoint2Id = shipmentDelivery.checkpoints[1].checkpointId
+                checkpoint2Id = shipmentDelivery.checkpoints[1].checkpointId,
+                time = DateTime.Now            
             };
             
             _dbContext.Shippers.Add(shipper);
@@ -54,7 +47,5 @@ namespace ShippingApp.Services
             response.Data = shipper;
             return response;
         }
-
-       
     }
 }

@@ -12,5 +12,6 @@
         public Guid driverId { get; set; }
         public string checkpoint1Id { get; set; }
         public string checkpoint2Id { get; set; }
+        public DateTime time { get; set; } 
     }
 }

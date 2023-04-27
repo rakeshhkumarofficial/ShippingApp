@@ -109,7 +109,8 @@ namespace ShippingApp.Services
                         isActive = shipper.isActive,
                         driverId = shipper.driverId,
                         checkpoint1Id = checkpointLocation1[0].checkpointName,
-                        checkpoint2Id = checkpointLocation2[0].checkpointName
+                        checkpoint2Id = checkpointLocation2[0].checkpointName,
+                        time = shipper.time,
                     };
                     Shippers.Add(response);
                 }
@@ -150,7 +151,8 @@ namespace ShippingApp.Services
                     isActive = shipper.isActive,
                     driverId = shipper.driverId,
                     checkpoint1Id = checkpointLocation1[0].checkpointName,
-                    checkpoint2Id = checkpointLocation2[0].checkpointName
+                    checkpoint2Id = checkpointLocation2[0].checkpointName,
+                    time = shipper.time,
                 };
                 ShipperList.Add(response);
             }
@@ -261,6 +263,7 @@ namespace ShippingApp.Services
                             driverId = Guid.Empty,
                             checkpoint1Id = updateDriver.checkpointLocation,
                             checkpoint2Id = shipmentRoute[i].checkpointId,
+                            time = DateTime.Now
                         };
 
                         Console.WriteLine(14);
@@ -345,6 +348,7 @@ namespace ShippingApp.Services
                 _rabbitMQProducer.SendStatusMessage(shipmentStatus);
                 shipper.driverId = request.driverId;
                 shipper.isAccepted = request.isAccepted;
+                shipper.time = DateTime.Now;
                 driver.isAvailable = true;
                 _dbContext.SaveChanges();
                 response.Data = shipper;
@@ -380,6 +384,7 @@ namespace ShippingApp.Services
                 _rabbitMQProducer.SendStatusMessage(shipmentStatus);
                 shipper.driverId = request.driverId;
                 shipper.isAccepted = request.isAccepted;
+                shipper.time = DateTime.Now;
                 driver.isAvailable = true;
                 _dbContext.SaveChanges();
                 response.Data = shipper;        

@@ -15,5 +15,6 @@ namespace ShippingApp.Models
         public Guid driverId { get; set; }
         public Guid checkpoint1Id { get; set; }
         public Guid checkpoint2Id { get; set; }
+        public DateTime time { get ; set; }
     }
 }
