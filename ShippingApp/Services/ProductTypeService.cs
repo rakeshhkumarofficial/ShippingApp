@@ -17,6 +17,8 @@ namespace ShippingApp.Services
         {
             _dbContext = dbContext;
         }
+
+        // add a new product type
         public Response AddProductType(AddProductTypeRequest productType)
         {
             response.Data = null;
@@ -47,6 +49,8 @@ namespace ShippingApp.Services
             response.Message = "New Product Type Created";
             return response;
         }
+
+        // delete a existing product type
         public Response DeleteProductType(Guid productTypeId)
         {
             response.Data = null;
@@ -65,6 +69,7 @@ namespace ShippingApp.Services
             response.Message = "Product Type is Deleted";
             return response;
         }
+        // get a product type
         public Response GetProductTypes(Guid productTypeId, string? type)
         {
             response.IsSuccess = true;
@@ -80,6 +85,8 @@ namespace ShippingApp.Services
             response.Data = productTypes;
             return response;
         }
+
+        // update  a existing product type
         public Response UpdateProductType(ProductType updateType)
         {
             response.Data = null;

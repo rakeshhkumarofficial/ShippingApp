@@ -15,6 +15,7 @@ namespace ShippingApp.Services
             _rabbitMQProducer = rabbitMQProducer;
         }
 
+        // add shipment to shipment delivery
         public Response AddDelivery(ShipmentDeliveryModel shipmentDelivery)
         {
             response.StatusCode = 200;
@@ -39,10 +40,12 @@ namespace ShippingApp.Services
             
             _dbContext.Shippers.Add(shipper);
             _dbContext.SaveChanges();
+            
             var notifyDriver = new NotifyDriver()
             {
                 driverIds = drivers,
             };
+            // notify all the drivers about the shipment avaliable in their location using rabbitMQ 
             _rabbitMQProducer.SendDriverMessage(notifyDriver);
             response.Data = shipper;
             return response;

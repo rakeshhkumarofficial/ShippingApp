@@ -15,6 +15,8 @@ namespace ShippingApp.Services
         {
             _dbContext = dbContext;
         }
+
+        // add a new container type
         public Response AddContainerType(AddContainerTypeRequest addContainer)
         {
             response.Data = null;
@@ -45,6 +47,8 @@ namespace ShippingApp.Services
             response.Message = "New Container Type Created";
             return response;
         }
+
+        // delete a container type
         public Response DeleteContainerType(Guid containerTypeId)
         {
             response.Data = null;
@@ -64,6 +68,8 @@ namespace ShippingApp.Services
             response.Message = "Container Type is Deleted";
             return response;
         }
+
+        // get a container type
         public Response GetContainerTypes(Guid containerTypeId, string? containerName)
         {
             response.IsSuccess = true;
@@ -79,7 +85,7 @@ namespace ShippingApp.Services
             response.Data = containerTypes;
             return response;
         }
-
+        // update a container type
         public Response UpdateContainerType(ContainerType updateContainer)
         {
             response.Data = null;

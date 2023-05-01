@@ -10,7 +10,6 @@ namespace ShippingApp.Controllers
     public class ContainerTypeController : ControllerBase
     {
         private readonly IContainerTypeService _containerTypeService;
-
         public ContainerTypeController(IContainerTypeService containerTypeService)
         {
             _containerTypeService = containerTypeService;

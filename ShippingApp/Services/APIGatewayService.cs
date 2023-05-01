@@ -8,6 +8,8 @@ namespace ShippingApp.Services
     public class APIGatewayService : IAPIGatewayService
     {
         Response response = new Response();
+
+        // using S2 microservice - getshipmentroute of shipment
         public List<CheckpointModel> GetShipmentRoute(Guid shipmentId)
         {
             using (var client = new HttpClient())
@@ -34,6 +36,7 @@ namespace ShippingApp.Services
             }
         }
 
+        // using s2 microservice - get all the checkpoints
         public List<CheckpointModel> GetCheckpoints(Guid checkpointId)
         {
             using (var client = new HttpClient())

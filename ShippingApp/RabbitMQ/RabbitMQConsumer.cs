@@ -10,12 +10,10 @@ namespace ShippingApp.RabbitMQ
     public class RabbitMQConsumer : IHostedService
     {
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
-        //private readonly IServiceProvider _serviceProvider;
         private readonly IServiceScopeFactory _scopeFactory;
 
-        public RabbitMQConsumer(IServiceScopeFactory scopeFactory)//,IServiceProvider serviceProvider)
+        public RabbitMQConsumer(IServiceScopeFactory scopeFactory)
         {
-            //_serviceProvider = serviceProvider;
             _scopeFactory = scopeFactory;
         }
 
@@ -64,7 +62,6 @@ namespace ShippingApp.RabbitMQ
                 {
                     var body = eventArgs.Body.ToArray();
                     var message = Encoding.UTF8.GetString(body);
-                   Console.WriteLine($"message received: {message}");
                     ShipmentDeliveryModel shipmentDelivery = System.Text.Json.JsonSerializer.Deserialize<ShipmentDeliveryModel>(message)!;
                     var res = service!.AddDelivery(shipmentDelivery!);
                     if (res.Data == null)

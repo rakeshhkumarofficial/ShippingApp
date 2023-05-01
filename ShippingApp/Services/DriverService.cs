@@ -19,6 +19,7 @@ namespace ShippingApp.Services
             _rabbitMQProducer = rabbitMQProducer;
             _gatewayService = gatewayService;
         }
+        // add a new driver
         public Response AddDriver(Driver driver)
         {
             response.Data = null;
@@ -48,6 +49,7 @@ namespace ShippingApp.Services
             response.Message = "Driver already Exits";
             return response;
         }
+        // delete the driver
         public Response DeleteDriver(Guid driverId)
         {
             response.Data = null;
@@ -67,6 +69,7 @@ namespace ShippingApp.Services
             response.Message = "Driver is Deleted";
             return response;
         }
+        // find driver by his location and driverId
         public Response GetDriver(Guid driverId, Guid checkpointLocation)
         {
             response.IsSuccess = true;
@@ -85,6 +88,7 @@ namespace ShippingApp.Services
             return response;
         }
 
+        // get shipements available according to the drivers location
         public Response GetShippers(Guid checkpointLocation,Guid driverId)
         {
             response.Data = null;
@@ -164,9 +168,9 @@ namespace ShippingApp.Services
             return response;
         }
 
+        // update driver location
         public Response UpdateDriver(UpdateDriverRequest updateDriver)
         {
-            Console.WriteLine(1);
             response.Data = null;
             response.StatusCode = 404;
             response.IsSuccess = false;
@@ -174,15 +178,15 @@ namespace ShippingApp.Services
             var driver = _dbContext.Drivers.Find(updateDriver.driverId);
             if (driver == null)
             {
-                Console.WriteLine(2);
                 response.Message = "Driver Not Found";
                 return response;
             }
+            // check if driver already having some active shipments
             var obj = _dbContext.Shippers.Where(s => s.driverId == driver.driverId && s.isActive == true && s.isAccepted == true).Select(s => s).ToList();
-            Console.WriteLine(3);
+           
+            // if shipments count = 0 then update only location else update all active shipment location also associated with driver
             if (obj.Count == 0)
             {
-                Console.WriteLine(4);
                 if (updateDriver.checkpointLocation != Guid.Empty) { driver.checkpointLocation = updateDriver.checkpointLocation; }
                 driver.isAvailable = true;
                 _dbContext.SaveChanges();
@@ -198,14 +202,13 @@ namespace ShippingApp.Services
                 response.Message = "Location Doesn't match with next checkpoint ";
                 return response;
             }
-            Console.WriteLine(5);
             float totalWeight = 0;
             foreach (var shipment in obj)
             {
                 Console.WriteLine(6);
                 totalWeight = totalWeight + shipment.shipmentWeight;
             }
-            Console.WriteLine(7);
+            // if shipments weight is > 17000 , then only update the driver location
             if (totalWeight < 17000)
             {
                 Console.WriteLine(8);
@@ -215,14 +218,12 @@ namespace ShippingApp.Services
                 response.Message = "Fill the container atleast 70% to move on.";
                 return response;
             }
-            Console.WriteLine(9);
             if (updateDriver.checkpointLocation != Guid.Empty) 
             { 
-                Console.WriteLine(10);
                 driver.checkpointLocation = updateDriver.checkpointLocation;
                 foreach (var item in obj)
                 {
-                    Console.WriteLine(11);
+                    // send the shipment status to s2 service using rabbitMQ
                     var shipmentStatus = new ShipmentStatusModel()
                     {
                         shipmentStatusId = Guid.NewGuid(),
@@ -232,7 +233,6 @@ namespace ShippingApp.Services
                         lastUpdated = DateTime.Now
                     };
                     item.isActive = false;
-                    //_dbContext.SaveChanges();
                     var shipmentRoute = _gatewayService.GetShipmentRoute(item.shipmentId);
                     int len = shipmentRoute.Count;
                     int i = 0;
@@ -243,12 +243,10 @@ namespace ShippingApp.Services
                         index++;
                         if (updateDriver.checkpointLocation == checkId.checkpointId)
                         {
-                            Console.WriteLine(12);
                             i = index;
                         }
                     }
-                    Console.WriteLine(i +" hii");
-                    Console.WriteLine(13);
+                    // generate the new shipment delivery 
                     if (i != len)
                     {
                         ShippmentDriverMapping shipper = new ShippmentDriverMapping()
@@ -266,31 +264,21 @@ namespace ShippingApp.Services
                             time = DateTime.Now
                         };
 
-                        Console.WriteLine(14);
                         if (updateDriver.checkpointLocation == shipmentRoute[0].checkpointId)
                         {
-                            Console.WriteLine(15);
                             shipmentStatus.shipmentStatus = "Picked Up";
                         }
                         else if (updateDriver.checkpointLocation == shipmentRoute[len - 1].checkpointId)
                         {
-                            Console.WriteLine(16);
                             shipmentStatus.shipmentStatus = "Delivered";
                         }
                         else
                         {
-                            Console.WriteLine(17);
                             shipmentStatus.shipmentStatus = "Arrived";
                         }
-                        Console.WriteLine(18);
-
                         _rabbitMQProducer.SendStatusMessage(shipmentStatus);
-                        Console.WriteLine(19);
                         _dbContext.Shippers.Add(shipper);
-                        Console.WriteLine(20);
-                        //driver.isAvailable = false;
                         _dbContext.SaveChanges();
-                        Console.WriteLine(21);
                     }
                     else
                     {
@@ -303,12 +291,9 @@ namespace ShippingApp.Services
                 response.StatusCode = 200;
                 response.IsSuccess = true;
                 response.Message = "Driver Location Updated";
-                Console.WriteLine(22);
                 return response;
                
             }
-
-            Console.WriteLine(23);
             return response;
         }
         public Response AcceptShipment(AcceptShipmentRequest request)
@@ -357,11 +342,14 @@ namespace ShippingApp.Services
                 response.StatusCode = 200;
                 return response;
             }
+            // check the container type of the previous shipments and new shipment
             if(hasShipment.First().containerType !=shipper.containerType)
             {
                 response.Message = " Container Type Does Not Match";
                 return response;
             }
+
+            // check the checkoint2Id of the previous shipments and new shipment
             if (hasShipment.First().checkpoint2Id != shipper.checkpoint2Id)
             {
                 response.Message = " Destination Does Not Match";
@@ -371,6 +359,7 @@ namespace ShippingApp.Services
             foreach (var shipment in hasShipment) {
                 totalWeight = totalWeight + shipment.shipmentWeight;
             }
+            // if weight all preivious + new shipemnt is <=25000 then only accept the new shipment
             if(shipper.shipmentWeight + totalWeight <= 25000)
             {
                 var shipmentStatus = new ShipmentStatusModel()
