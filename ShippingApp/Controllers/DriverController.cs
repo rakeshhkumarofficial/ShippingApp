@@ -71,7 +71,21 @@ namespace ShippingApp.Controllers
         [HttpGet]
         public ActionResult GetCheckpoints(Guid checkpointId)
         {
-            var res = _gatewayService.GetCheckpoints(checkpointId);
+            var res = _gatewayService.GetCheckpoints(checkpointId,null);
+            return Ok(res);
+        }
+
+        [HttpGet]
+        public ActionResult GetCheckpointsDistance(Guid checkpoint1Id,Guid checkpoint2Id)
+        {
+            var res = _gatewayService.GetCheckpointsDistance(checkpoint1Id, checkpoint2Id);
+            return Ok(res);
+        }
+
+        [HttpGet]
+        public ActionResult GetDriverEarnings(Guid driverId, DateTime date, DateTime month, DateTime today)
+        {
+            var res = _driverService.GetDriverEarnings(driverId, date, month, today);
             return Ok(res);
         }
 

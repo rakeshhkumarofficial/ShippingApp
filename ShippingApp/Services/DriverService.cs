@@ -100,8 +100,8 @@ namespace ShippingApp.Services
                 List<GetShippersResponse> Shippers = new List<GetShippersResponse>();
                 foreach (var shipper in shippersDriver)
                 {
-                    var checkpointLocation1 = _gatewayService.GetCheckpoints(shipper.checkpoint1Id);
-                    var checkpointLocation2 = _gatewayService.GetCheckpoints(shipper.checkpoint2Id);
+                    var checkpointLocation1 = _gatewayService.GetCheckpoints(shipper.checkpoint1Id,null);
+                    var checkpointLocation2 = _gatewayService.GetCheckpoints(shipper.checkpoint2Id,null);
                     GetShippersResponse response = new GetShippersResponse()
                     {
                         mapId = shipper.mapId,
@@ -142,8 +142,8 @@ namespace ShippingApp.Services
             List<GetShippersResponse> ShipperList= new List< GetShippersResponse>();
             foreach(var shipper in shippers)
             {
-                var checkpointLocation1 = _gatewayService.GetCheckpoints(shipper.checkpoint1Id);
-                var checkpointLocation2 = _gatewayService.GetCheckpoints(shipper.checkpoint2Id);
+                var checkpointLocation1 = _gatewayService.GetCheckpoints(shipper.checkpoint1Id,null);
+                var checkpointLocation2 = _gatewayService.GetCheckpoints(shipper.checkpoint2Id,null);
                 GetShippersResponse response = new GetShippersResponse()
                 {
                     mapId = shipper.mapId,
@@ -219,8 +219,22 @@ namespace ShippingApp.Services
                 return response;
             }
             if (updateDriver.checkpointLocation != Guid.Empty) 
-            { 
+            {
+                var trip = new Trip()
+                {
+                    tripId = Guid.NewGuid(),
+                    driverId = driver.driverId,
+                    checkpoint1Id = driver.checkpointLocation,
+                    checkpoint2Id = driver.checkpointLocation,
+                    Price = 0,
+                    dateTime = DateTime.Now,
+                };
                 driver.checkpointLocation = updateDriver.checkpointLocation;
+                trip.checkpoint2Id = driver.checkpointLocation;
+                decimal distance = _gatewayService.GetCheckpointsDistance(trip.checkpoint1Id, trip.checkpoint2Id);
+                trip.Price = distance * 5;
+                _dbContext.Trips.Add(trip);
+                _dbContext.SaveChanges();
                 foreach (var item in obj)
                 {
                     // send the shipment status to s2 service using rabbitMQ
@@ -287,6 +301,7 @@ namespace ShippingApp.Services
                         _dbContext.SaveChanges();
                     }
                 }
+                
                 response.Data = driver;
                 response.StatusCode = 200;
                 response.IsSuccess = true;
@@ -389,6 +404,45 @@ namespace ShippingApp.Services
                 response.IsSuccess = false;
                 response.StatusCode = 400;              
             }
+            return response;
+        }
+
+        public Response GetDriverEarnings(Guid driverId, DateTime date , DateTime month , DateTime today)
+        {
+            response.Data = null;
+            response.StatusCode = 404;
+            response.IsSuccess = false;
+            response.Message = "No driver Found";
+            var driver = _dbContext.Drivers.Find(driverId);
+            if (driver == null)
+            {
+                response.Message = "Driver Not Found";
+                return response;
+            }
+            if(date == DateTime.MinValue && month == DateTime.MinValue && today == DateTime.MinValue)
+            {
+                var earnings = _dbContext.Trips.Where(t => t.driverId == driverId).Select(t=>t.Price).ToList();
+                decimal totalEarnings = 0;
+                foreach (var e in earnings)
+                {
+                    totalEarnings = totalEarnings + e;
+                }
+                response.IsSuccess=true;
+                response.StatusCode =200;
+                response.Message = " Total earnings";
+                response.Data = totalEarnings;
+                return response;
+            }
+            var earning = _dbContext.Trips.Where(t => t.driverId == driverId && (t.dateTime.Date == date.Date || t.dateTime.Month == month.Month || t.dateTime.Day == today.Day)).Select(t => t.Price).ToList();
+            decimal totalEarning = 0;
+            foreach (var er in earning)
+            {
+                totalEarning = totalEarning + er;
+            }
+            response.IsSuccess = true;
+            response.StatusCode = 200;
+            response.Message = " Total earnings";
+            response.Data = totalEarning;
             return response;
         }
     }
