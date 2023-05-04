@@ -96,5 +96,12 @@ namespace ShippingApp.Controllers
             return Ok(res);
         }
 
+        [HttpGet]
+        public ActionResult GetChartEarnings(Guid driverId)
+        {
+            var res = _driverService.GetChartEarnings(driverId);
+            return Ok(res);
+        }
+
     }
 }

@@ -4,6 +4,7 @@ using ShippingApp.Data;
 using ShippingApp.Migrations;
 using ShippingApp.Models;
 using ShippingApp.RabbitMQ;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ShippingApp.Services
 {
@@ -413,7 +414,6 @@ namespace ShippingApp.Services
             response.Data = null;
             response.StatusCode = 404;
             response.IsSuccess = false;
-            response.Message = "No driver Found";
             var driver = _dbContext.Drivers.Find(driverId);
             if (driver == null)
             {
@@ -462,7 +462,6 @@ namespace ShippingApp.Services
             response.Data = null;
             response.StatusCode = 404;
             response.IsSuccess = false;
-            response.Message = "No driver Found";
             var driver = _dbContext.Drivers.Find(driverId);
             if (driver == null)
             {
@@ -492,6 +491,36 @@ namespace ShippingApp.Services
             response.StatusCode = 200;
             response.Message = " Total earnings";
             response.Data = trip;
+            return response;
+        }
+        public Response GetChartEarnings(Guid driverId)
+        {
+            response.Data = null;
+            response.StatusCode = 404;
+            response.IsSuccess = false;
+            var driver = _dbContext.Drivers.Find(driverId);
+            if (driver == null)
+            {
+                response.Message = "Driver Not Found";
+                return response;
+            }
+            List<float> chartList = new List<float>();
+            for(int i =1; i<=12; i++)
+            {
+                var Earnings = _dbContext.Trips.Where(t => t.driverId == driverId && (t.dateTime.Year == DateTime.Now.Year && t.dateTime.Month == i)).Select(t => t.Price).ToList();
+                
+                float _earning = 0;
+                foreach (var e in Earnings)
+                {
+                    _earning = _earning + e;
+                }
+                
+                chartList.Add(_earning);
+            }
+            response.IsSuccess = true;
+            response.StatusCode = 200;
+            response.Message = " Monthly chart earnings";
+            response.Data = chartList;
             return response;
         }
     }

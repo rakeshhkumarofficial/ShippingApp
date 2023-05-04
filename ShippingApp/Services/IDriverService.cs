@@ -12,5 +12,6 @@ namespace ShippingApp.Services
         public Response AcceptShipment(AcceptShipmentRequest request);
         public Response GetDriverEarnings(Guid driverId);
         public Response GetDateEarnings(Guid driverId, DateTime date1, DateTime date2);
+        public Response GetChartEarnings(Guid driverId);
     }
 }
