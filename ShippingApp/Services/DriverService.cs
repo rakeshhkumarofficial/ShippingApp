@@ -231,8 +231,10 @@ namespace ShippingApp.Services
                 };
                 driver.checkpointLocation = updateDriver.checkpointLocation;
                 trip.checkpoint2Id = driver.checkpointLocation;
-                decimal distance = _gatewayService.GetCheckpointsDistance(trip.checkpoint1Id, trip.checkpoint2Id);
-                trip.Price = distance * 5;
+                float distance = _gatewayService.GetCheckpointsDistance(trip.checkpoint1Id, trip.checkpoint2Id);
+                var container = _dbContext.Shippers.Where(s => s.driverId == driver.driverId && s.isActive == true && s.isAccepted == true).FirstOrDefault(); 
+                float containerPrice = _dbContext.ContainerTypes.Where(c=>c.containerName == container.containerType).FirstOrDefault().price;
+                trip.Price = ((distance + (totalWeight * containerPrice))*5*0.15f);
                 _dbContext.Trips.Add(trip);
                 _dbContext.SaveChanges();
                 foreach (var item in obj)
@@ -406,8 +408,7 @@ namespace ShippingApp.Services
             }
             return response;
         }
-
-        public Response GetDriverEarnings(Guid driverId, DateTime date , DateTime month , DateTime today)
+        public Response GetDriverEarnings(Guid driverId)
         {
             response.Data = null;
             response.StatusCode = 404;
@@ -419,30 +420,78 @@ namespace ShippingApp.Services
                 response.Message = "Driver Not Found";
                 return response;
             }
-            if(date == DateTime.MinValue && month == DateTime.MinValue && today == DateTime.MinValue)
+            // total earnings of driver
+            var totalEarnings = _dbContext.Trips.Where(t => t.driverId == driverId).Select(t => t.Price).ToList();
+            float _totalEarning = 0;
+            int _totalTrip = 0;
+            foreach (var t in totalEarnings)
             {
-                var earnings = _dbContext.Trips.Where(t => t.driverId == driverId).Select(t=>t.Price).ToList();
-                decimal totalEarnings = 0;
-                foreach (var e in earnings)
-                {
-                    totalEarnings = totalEarnings + e;
-                }
-                response.IsSuccess=true;
-                response.StatusCode =200;
-                response.Message = " Total earnings";
-                response.Data = totalEarnings;
-                return response;
+                _totalEarning = _totalEarning + t;
+                _totalTrip++;
             }
-            var earning = _dbContext.Trips.Where(t => t.driverId == driverId && (t.dateTime.Date == date.Date || t.dateTime.Month == month.Month || t.dateTime.Day == today.Day)).Select(t => t.Price).ToList();
-            decimal totalEarning = 0;
-            foreach (var er in earning)
+            // monthly earnings of driver
+            var monthlyEarnings = _dbContext.Trips.Where(t => t.driverId == driverId && ( t.dateTime.Month == DateTime.Now.Month)).Select(t => t.Price).ToList();
+            float _monthlyEarning = 0;
+            foreach (var m in monthlyEarnings)
             {
-                totalEarning = totalEarning + er;
+                _monthlyEarning = _monthlyEarning + m;
             }
+            // daily earnings of driver
+            var todayEarnings = _dbContext.Trips.Where(t => t.driverId == driverId && (t.dateTime.Day == DateTime.Now.Day)).Select(t => t.Price).ToList();
+            float _todayEarning = 0;
+            foreach (var td in todayEarnings)
+            {
+                _todayEarning = _todayEarning + td;
+            }
+            var trip = new GetTripResponse()
+            {
+                totalTrips = _totalTrip,
+                totalEarnings = _totalEarning,
+                monthlyEarning = _monthlyEarning,
+                todayEarning = _todayEarning
+
+            };
             response.IsSuccess = true;
             response.StatusCode = 200;
             response.Message = " Total earnings";
-            response.Data = totalEarning;
+            response.Data = trip;
+            return response;
+        }
+        public Response GetDateEarnings(Guid driverId , DateTime date1 , DateTime date2)
+        {
+            response.Data = null;
+            response.StatusCode = 404;
+            response.IsSuccess = false;
+            response.Message = "No driver Found";
+            var driver = _dbContext.Drivers.Find(driverId);
+            if (driver == null)
+            {
+                response.Message = "Driver Not Found";
+                return response;
+            }
+            
+            // monthly earnings of driver
+            var Earnings = _dbContext.Trips.Where(t => t.driverId == driverId && (t.dateTime.Date >= date1.Date && t.dateTime.Date <=date2.Date)).Select(t => t.Price).ToList();
+            float _earning = 0;
+            int _totalTrip = 0;
+            
+            foreach (var e in Earnings)
+            {
+                _earning = _earning + e;
+                _totalTrip++;
+            }
+            // daily earnings of driver
+            var trip = new GetTripResponse()
+            {
+                totalTrips = _totalTrip,
+                totalEarnings = _earning,
+                monthlyEarning = 0,
+                todayEarning = 0
+            };
+            response.IsSuccess = true;
+            response.StatusCode = 200;
+            response.Message = " Total earnings";
+            response.Data = trip;
             return response;
         }
     }

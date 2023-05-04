@@ -83,9 +83,16 @@ namespace ShippingApp.Controllers
         }
 
         [HttpGet]
-        public ActionResult GetDriverEarnings(Guid driverId, DateTime date, DateTime month, DateTime today)
+        public ActionResult GetDriverEarnings(Guid driverId)
         {
-            var res = _driverService.GetDriverEarnings(driverId, date, month, today);
+            var res = _driverService.GetDriverEarnings(driverId);
+            return Ok(res);
+        }
+
+        [HttpGet]
+        public ActionResult GetDateEarnings(Guid driverId,DateTime date1 , DateTime date2)
+        {
+            var res = _driverService.GetDateEarnings(driverId,date1,date2);
             return Ok(res);
         }
 

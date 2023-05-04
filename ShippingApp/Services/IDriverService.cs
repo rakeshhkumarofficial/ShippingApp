@@ -10,6 +10,7 @@ namespace ShippingApp.Services
         public Response UpdateDriver(UpdateDriverRequest updateDriver);
         public Response GetShippers(Guid checkpointLocation, Guid driverId);
         public Response AcceptShipment(AcceptShipmentRequest request);
-        public Response GetDriverEarnings(Guid driverId, DateTime date, DateTime month, DateTime today);
+        public Response GetDriverEarnings(Guid driverId);
+        public Response GetDateEarnings(Guid driverId, DateTime date1, DateTime date2);
     }
 }

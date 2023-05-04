@@ -67,7 +67,7 @@ namespace ShippingApp.Services
             }
         }
 
-        public decimal GetCheckpointsDistance(Guid checkpoint1Id, Guid checkpoint2Id)
+        public float GetCheckpointsDistance(Guid checkpoint1Id, Guid checkpoint2Id)
         {
             using (var client = new HttpClient())
             {
@@ -88,7 +88,7 @@ namespace ShippingApp.Services
                 var data = res.Content.ReadAsStringAsync().Result;
                 APIResponseModel resp = JsonSerializer.Deserialize<APIResponseModel>(data)!;
                 var obj = JsonSerializer.Serialize(resp.data);
-                decimal distance = JsonSerializer.Deserialize<decimal>(obj);
+                float distance = JsonSerializer.Deserialize<float>(obj);
                 response.IsSuccess = true;
                 response.StatusCode = 200;
                 response.Message = "Checkpoints distance";

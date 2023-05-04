@@ -6,6 +6,6 @@ namespace ShippingApp.Services
     {
         public List<CheckpointModel> GetShipmentRoute(Guid shipmentId);
         public List<CheckpointModel> GetCheckpoints(Guid checkpointId,string checkpointName);
-        public decimal GetCheckpointsDistance(Guid checkpoint1Id , Guid checkpoint2Id);
+        public float GetCheckpointsDistance(Guid checkpoint1Id , Guid checkpoint2Id);
     }
 }
