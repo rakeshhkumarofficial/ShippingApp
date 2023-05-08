@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using RabbitMQ.Client;
 using System.Text;
 
@@ -6,6 +7,13 @@ namespace ShippingApp.RabbitMQ
 {
     public class RabbitMQProducer : IRabbitMQProducer
     {
+        private readonly IConfiguration _configuration;
+
+        public RabbitMQProducer(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
         public void SendDriverMessage<T>(T message)
         {
             //Rabbit MQ Server
@@ -42,10 +50,10 @@ namespace ShippingApp.RabbitMQ
             var factory = new ConnectionFactory
             {
                 //HostName = "localhost"
-                HostName = "192.180.3.63",
+                HostName = _configuration.GetSection("RabbitMQ:Host").Value!,
                 Port = Protocols.DefaultProtocol.DefaultPort,
-                UserName = "s3",
-                Password = "guest",
+                UserName = _configuration.GetSection("RabbitMQ:Username").Value!,
+                Password = _configuration.GetSection("RabbitMQ:Password").Value!,
                 VirtualHost = "/",
                 ContinuationTimeout = new TimeSpan(10, 0, 0, 0)
             };

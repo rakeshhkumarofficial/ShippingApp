@@ -8,13 +8,21 @@ namespace ShippingApp.Services
     public class APIGatewayService : IAPIGatewayService
     {
         Response response = new Response();
+        private readonly IConfiguration _configuration;
+        private string Url;
+
+        public APIGatewayService(IConfiguration configuration)
+        {
+            _configuration = configuration;
+             Url = _configuration.GetSection("APIGateway:URL").Value!;
+        }
 
         // using S2 microservice - getshipmentroute of shipment
         public List<CheckpointModel> GetShipmentRoute(Guid shipmentId)
         {
             using (var client = new HttpClient())
             {
-                client.BaseAddress = new Uri("http://192.180.2.128:4000/");
+                client.BaseAddress = new Uri(Url);
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
@@ -41,7 +49,7 @@ namespace ShippingApp.Services
         {
             using (var client = new HttpClient())
             {
-                client.BaseAddress = new Uri("http://192.180.2.128:4000/");
+                client.BaseAddress = new Uri(Url);
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
@@ -67,11 +75,12 @@ namespace ShippingApp.Services
             }
         }
 
+        // using s2 microservice - get Distance between two checkpoints
         public float GetCheckpointsDistance(Guid checkpoint1Id, Guid checkpoint2Id)
         {
             using (var client = new HttpClient())
             {
-                client.BaseAddress = new Uri("http://192.180.2.128:4000/");
+                client.BaseAddress = new Uri(Url);
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 

@@ -11,10 +11,12 @@ namespace ShippingApp.RabbitMQ
     {
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         private readonly IServiceScopeFactory _scopeFactory;
+        private readonly IConfiguration _configuration;
 
-        public RabbitMQConsumer(IServiceScopeFactory scopeFactory)
+        public RabbitMQConsumer(IServiceScopeFactory scopeFactory,IConfiguration configuration)
         {
             _scopeFactory = scopeFactory;
+            _configuration = configuration;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -36,10 +38,10 @@ namespace ShippingApp.RabbitMQ
                 // Rabbit MQ Server
                 var factory = new ConnectionFactory
                 {
-                    HostName = "192.180.3.63",
+                    HostName = _configuration.GetSection("RabbitMQ:Host").Value!,
                     Port = Protocols.DefaultProtocol.DefaultPort,
-                    UserName = "s3",
-                    Password = "guest",
+                    UserName = _configuration.GetSection("RabbitMQ:Username").Value!,
+                    Password = _configuration.GetSection("RabbitMQ:Password").Value!,
                     VirtualHost = "/",
                     ContinuationTimeout = new TimeSpan(10, 0, 0, 0)
                     /*Uri

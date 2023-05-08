@@ -12,7 +12,6 @@ namespace ShippingApp.Data
         public DbSet<ContainerType> ContainerTypes { get; set; }
         public DbSet<Driver> Drivers { get; set; }
         public DbSet<ShippmentDriverMapping> Shippers { get; set; }
-
         public DbSet<Trip> Trips { get; set; }
     }
 }
