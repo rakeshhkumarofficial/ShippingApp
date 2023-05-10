@@ -235,7 +235,8 @@ namespace ShippingApp.Services
                 float distance = _gatewayService.GetCheckpointsDistance(trip.checkpoint1Id, trip.checkpoint2Id);
                 var container = _dbContext.Shippers.Where(s => s.driverId == driver.driverId && s.isActive == true && s.isAccepted == true).FirstOrDefault(); 
                 float containerPrice = _dbContext.ContainerTypes.Where(c=>c.containerName == container.containerType).FirstOrDefault().price;
-                trip.Price = ((distance + (totalWeight * containerPrice))*5*0.15f);
+                trip.Price = ((distance)*5 + (totalWeight * containerPrice)*2)*0.15f;
+                
                 _dbContext.Trips.Add(trip);
                 _dbContext.SaveChanges();
                 foreach (var item in obj)
